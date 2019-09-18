@@ -1,0 +1,53 @@
+a. Lotto
+
+1. Winnings by user
+
+b. Payment Processor
+
+Modify to interact with transaction posting service
+
+---
+
+c. Transactions
+
+1. Implement chain-hashing transaction book
+2. Implement transaction posting service
+3. Implement transaction back-checking service
+
+4. New transfer class, child of account class
+5. Attributes: comment = transferfromacct
+6. If mutliple transfers and one fails, how know which transfer to release back?
+    -> only release expired at end of day; if transaction fails at mining, mark as expired
+
+
+d. Task scheduling
+
+1. End of day process list
+
+
+***** C) 1 *****
+
+CHAIN-HASHING TRANSACTION BOOK
+
+- Use a dictionary of lists
+- Key will be the transaction id
+- independent changes log to record things like changes in difficulty
+- data will be as follows:
+    
+transaction ID:
+                    From        To      Transfer      Amnt       Timestamp    Last Hash
+
+trnbook class:
+    book as dictionary
+    checkentries function to test integrity of chain and pinpoint errors
+    newentry function, to check hash, check prev hash, 
+
+
+
+
+How to sort tree such that transactions are in the leaf nodes
+
+Trns    Nll
+0       0(root)
+1       1
+>4       2
