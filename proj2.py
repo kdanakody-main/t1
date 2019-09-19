@@ -37,6 +37,12 @@
         -editpol:#
         -viewpol:#
 
+
+        NEW COMMAND SYNTAX:
+            command:arg1 arg2 arg3 arg...
+            eg.  new_bracket:2000 10000 2
+                -> Creates a new bracket between $2000 and $10000 for 2%
+
         TODO
 
         -in transactions
@@ -71,30 +77,34 @@ class policy:
         self.breaks = {0:None} # { code: [min, max, %], code [min, max, %] }
         global policy_list
         policy_list.append(self)
-    def new_bracket(self, lower, upper, rate):
+    def new_bracket(self, args):
+        lower, upper, rate = args[0], args[1], args[2]
         index = self.brackets[list(self.brackets.keys())[-1]]
         self.brackets[index+1] = [lower, upper, rate]
         return index
-    def new_break(self, code, lower, upper, rate):
+    def new_break(self, args):
+        code, lower, upper, rate = args[0], args[1], args[2], args[3]
         self.breaks[code] = [lower, upper, rate]
         return code
-    def edit_bracket(self, index, lower=None, upper=None, rate=None):
+    def edit_bracket(self, args):
+        index, toedit, value = args[0], args[1], args[2]
         if index in self.brackets.keys():
-            if lower:
+            if toedit == 'lower':
                 self.brackets[index][0] = lower
-            elif upper:
+            elif toedit == 'upper':
                 self.brackets[index][1] = upper
-            elif rate:
+            elif toedit == 'rate':
                 self.brackets[index][2] = rate
             else: return None
         else: return None
-    def edit_break(self, code, lower=None, upper=None, rate=None):
+    def edit_break(self, args):
+        code, toedit, value = args[0], args[1], args[2]
         if code in self.breaks.keys():
-            if lower:
+            if toedit == 'lower':
                 self.breaks[code][0] = lower
-            elif upper:
+            elif toedit == 'upper':
                 self.breaks[code][1] = upper
-            elif rate:
+            elif toedit == 'rate':
                 self.breaks[code][2] = rate
             else: return None
         else: return None
@@ -125,19 +135,29 @@ def getcmd():
 
 #parse(str, str)
 # 
-def parse(cmd1, cmd2):
+
+polcommands = {'new_bracket': new_bracket, 'new_break': new_bracket
+expolcommands = {'edit_bracket': edit_bracket, 'edit_break': edit_break}
+def parse(cmd, args):
     global in_policy
     global in_return
     global in_break
-    if cmd1 == 'startpol':
+    if cmd == 'startpol':
         active = check_active()
         if active:
-            print("Error: {} currently in progress".format())
-        pol = policy(len(policy_list+1))
-        in_policy = pol
-        return 0
-    elif cmd1 == '':
+            print("Error: {} currently in progress".format(active))
+        else:
+            pol = policy(len(policy_list+1))
+            in_policy = pol
+            return 0
+    elif cmd == 'end':
         pass
+    else:
+        if cmd in polcommands and in_policy:
+            in_policy.commands[cmd](args)
+        elif cmd in expolcommands:
+            expolcommands[cmd](args)
+        else: print("Command not recognized")
 
 def check_active():
     if in_policy:
